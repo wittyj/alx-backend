@@ -1,51 +1,33 @@
-#!/usr/bin/env fish
-python3 -m doctest -v (basename (status -f))
-exit
+#!/usr/bin/env python3
+"""First-In First-Out caching module.
 """
->>> BasicCache = __import__('0-basic_cache').BasicCache
->>> my_cache = BasicCache()
->>> my_cache.print_cache()
-Current cache:
+from collections import OrderedDict
 
->>> my_cache.put("A", "Hello")
->>> my_cache.put("B", "World")
->>> my_cache.put("C", "Holberton")
->>> my_cache.print_cache()
-Current cache:
-A: Hello
-B: World
-C: Holberton
+from base_caching import BaseCaching
 
->>> print(my_cache.get("A"))
-Hello
 
->>> print(my_cache.get("B"))
-World
+class FIFOCache(BaseCaching):
+    """Represents an object that allows storing and
+    retrieving items from a dictionary with a FIFO
+    removal mechanism when the limit is reached.
+    """
+    def __init__(self):
+        """Initializes the cache.
+        """
+        super().__init__()
+        self.cache_data = OrderedDict()
 
->>> print(my_cache.get("C"))
-Holberton
+    def put(self, key, item):
+        """Adds an item in the cache.
+        """
+        if key is None or item is None:
+            return
+        self.cache_data[key] = item
+        if len(self.cache_data) > BaseCaching.MAX_ITEMS:
+            first_key, _ = self.cache_data.popitem(False)
+            print("DISCARD:", first_key)
 
->>> print(my_cache.get("D"))
-None
-
->>> my_cache.print_cache()
-Current cache:
-A: Hello
-B: World
-C: Holberton
-
->>> my_cache.put("D", "School")
->>> my_cache.put("E", "Battery")
->>> my_cache.put("A", "Street")
->>> my_cache.print_cache()
-Current cache:
-A: Street
-B: World
-C: Holberton
-D: School
-E: Battery
-
->>> print(my_cache.get("A"))
-Street
-
-"""
+    def get(self, key):
+        """Retrieves an item by key.
+        """
+        return self.cache_data.get(key, None)
